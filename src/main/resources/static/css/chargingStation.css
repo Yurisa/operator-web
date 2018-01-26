@@ -1,0 +1,122 @@
+.layui-container{
+    padding:0px 0px 20px 0 ;
+    min-width:500px;
+
+}
+.myChargingStation{
+    height: auto;
+    min-height:170px;
+    padding: 10px;
+    margin:10px 0 10px 0;
+}
+.myChargingStationContainer{
+    border:solid #e2e2e2 0.1px;
+    min-width:230px;
+    height:auto;
+    min-height:150px;
+    padding:20px 0 20px 10px;
+    position: relative;
+}
+.chargingStationPlace .placeName，.chargingStationName .chargingStationNameSpan{
+    overflow: hidden;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+}
+.chargingStationPlace .layui-icon{
+    font-size:22px;
+    cursor: pointer;
+}
+@font-face {
+    font-family: 'iconfont';  /* project id 502974 */
+    src: url('//at.alicdn.com/t/font_502974_gvy1gy7ukmn7y14i.eot');
+    src: url('//at.alicdn.com/t/font_502974_gvy1gy7ukmn7y14i.eot?#iefix') format('embedded-opentype'),
+    url('//at.alicdn.com/t/font_502974_gvy1gy7ukmn7y14i.woff') format('woff'),
+    url('//at.alicdn.com/t/font_502974_gvy1gy7ukmn7y14i.ttf') format('truetype'),
+    url('//at.alicdn.com/t/font_502974_gvy1gy7ukmn7y14i.svg#iconfont') format('svg');
+}
+.iconfont{
+    font-family:"iconfont" !important;
+    font-size:32px;
+    font-style:normal;
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-stroke-width: 0.2px;
+    -moz-osx-font-smoothing: grayscale;
+}
+.icon {
+    width: 1em; height: 1em;
+    vertical-align: -0.15em;
+    fill: currentColor;
+    overflow: hidden;
+}
+.chargingStationIcons .iconfont:nth-child(1){
+    color:   #cccccc;
+    font-size:30px;
+}
+.chargingStationIcons i:nth-child(2){
+    color: #29a329;
+    font-size:30px;
+}
+.chargingStationIcons .iconfont:nth-child(3){
+    color:  #e60000;
+}
+.chargingStationIcons .iconfont:nth-child(4){
+    color:  #a6a6a6;
+}
+.chargingStationIcons .iconfont{
+    float:left;
+    cursor: pointer;
+}
+.chargingStationIcons .layui-col-xs3{
+    line-height: 32px;
+    min-width:60px;
+}
+.chargingStationIcons  .layui-col-xs3 span{
+    text-indent:8px;
+}
+.chargingStationName{
+    text-align: center;
+    margin-bottom:10px;
+}
+.chargingStationPlace,.placeName{
+    margin-bottom: 20px;
+}
+.chargingStationIcons{
+    margin-bottom: 5px;
+}
+.chargingStationPlace,.chargingStationIcons,.chargingDetails{
+    padding-left:10px;
+}
+/*十字架添加：*/
+.CrossDiv{
+    position: relative;
+}
+#cross {
+    background: #009688;
+    height: 100px;
+    line-height:100px;
+    position:relative;
+    width: 20px;
+    margin:0 auto;
+    margin-top:12%;
+    margin-left:44%;
+    -webkit-border-radius:4px;
+    -moz-border-radius:4px;
+    border-radius:4px;
+}
+#cross:after {
+    background: #009688;
+    content: "";
+    height: 20px;
+    left: -50px;
+    position: absolute;
+    top: 40px;
+    width: 120px;
+    -webkit-border-radius:4px;
+    -moz-border-radius:4px;
+    border-radius:4px;
+}
+@media screen and (min-width: 1000px){
+    .layui-container {
+        width: 1100px;
+    }
+}

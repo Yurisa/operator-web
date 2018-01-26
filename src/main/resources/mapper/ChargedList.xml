@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.ChargedListDao">
+	<insert id="addChargedList" parameterType="ChargedListInfo">
+        INSERT INTO charged_list
+        (
+        create_time,
+        charging_begin_time,
+        charging_user_id,
+        charging_pile_no,
+        vehicle_no,
+        status
+        )
+        VALUES
+        (
+        now(),
+        #{chargingBeginTime},
+        #{chargingUserId},
+        #{chargingPileNo},
+        #{vehicleNo},
+        #{status}
+        )
+    </insert>
+    <update id="update">
+    	UPDATE charged_list
+    	SET charging_begin_time=#{chargingBeginTime},vehicle_no=#{vehicleNo},charging_user_id=#{chargingUserId}
+    	WHERE id = #{id}
+    </update>
+    <update id="updateStatus">
+    	UPDATE charged_list
+    	SET status=#{status}
+    	WHERE id=#{id}
+    </update>
+    <update id="setParkingTime">
+	    UPDATE charged_list
+	    SET park_begin_time = #{parkingTime},status=2
+	    WHERE charging_pile_no = #{pileNo} and park_begin_time is null
+    </update>
+    <update id="setStartTime">
+	    UPDATE charged_list
+	    SET charging_begin_time = #{startTime},status=3
+		WHERE charging_pile_no = #{pileNo} and charging_begin_time is null
+    </update>
+    <update id="setFullTime">
+	    UPDATE charged_list
+	    SET charging_full_time = #{fullTime},status=5
+		WHERE charging_pile_no = #{pileNo} and charging_begin_time is not null and charging_full_time is null
+    </update>
+    <update id="setEndTimeAndTotalElectricity">
+	    UPDATE charged_list
+	    SET charging_end_time = #{endTime},status=6,electricity=#{totalElectricity}
+		WHERE charging_pile_no = #{pileNo} and charging_begin_time is not null and charging_end_time is null
+    </update>
+    <update id="setLeavingTime">
+	    UPDATE charged_list
+	    SET park_end_time = #{leavingTime},status=7
+		WHERE charging_pile_no = #{pileNo} and park_begin_time is not null and park_end_time is null
+    </update>
+    <select id="getPileChargedList" resultType="ChargedListInfo">
+    	SELECT 
+    		id,create_time,
+    		charging_begin_time,charging_end_time,charging_full_time,
+    		park_begin_time,park_end_time,
+    		charging_user_id,charging_pile_no,vehicle_no,status
+    	FROM charged_list
+    	WHERE charging_pile_no = #{pileNo} 
+    		and create_time between #{start} and #{end} 
+    	ORDER BY create_time desc
+    </select>
+    <select id="getUserChargedList"  resultType="ChargedListInfo">
+    	SELECT 
+    		id,create_time,
+    		charging_begin_time,charging_end_time,charging_full_time,
+    		park_begin_time,park_end_time,
+    		charging_user_id,charging_pile_no,vehicle_no,status
+    	FROM charged_list
+    	WHERE charging_user_id = #{userId} 
+    		and create_time between #{start} and #{end}
+    	ORDER BY create_time desc
+    </select>
+    <select id="getPileCurrentChargedList"  resultType="ChargedListInfo">
+    	SELECT 
+    		id,create_time,
+    		charging_begin_time,charging_end_time,charging_full_time,
+    		park_begin_time,park_end_time,
+    		charging_user_id,charging_pile_no,vehicle_no,status
+    	FROM charged_list
+    	WHERE charging_pile_no = #{pileNo} 
+    		and charging_end_time is null
+    	ORDER BY create_time desc
+    </select>
+    <select id="getUserCurrentChargedList" resultType="ChargedListInfo">
+    	SELECT 
+    		id,create_time,
+    		charging_begin_time,charging_end_time,charging_full_time,
+    		park_begin_time,park_end_time,
+    		charging_user_id,charging_pile_no,vehicle_no,status
+    	FROM charged_list
+    	WHERE charging_user_id = #{userId}
+    		and charging_end_time is null
+    	ORDER BY create_time desc
+    </select>
+    <select id="getUnstart" resultType="ChargedListInfo">
+    	SELECT 
+    		id,create_time,
+    		charging_begin_time,charging_end_time,charging_full_time,
+    		park_begin_time,park_end_time,
+    		charging_user_id,charging_pile_no,vehicle_no,status
+    	FROM charged_list
+    	WHERE charging_pile_no = #{pileNo}
+    		and create_time is not null
+    		and ((charging_begin_time is not null and charging_user_id is null) or (charging_begin_time is null and charging_user_id is not null))
+    		and charging_end_time is null and charging_full_time is null and status &lt; 4
+    	ORDER BY create_time desc
+    	LIMIT 0,1
+    </select>
+    <select id="getChargedList" resultType="ChargedListInfo">
+    	SELECT 
+    		id,create_time,
+    		charging_begin_time,charging_end_time,charging_full_time,
+    		park_begin_time,park_end_time,
+    		charging_user_id,charging_pile_no,vehicle_no,status
+    	FROM charged_list
+    	WHERE id = #{chargedListId}
+    </select>
+</mapper>

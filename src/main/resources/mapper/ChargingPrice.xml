@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.ChargingPriceDao">
+    <select id="queryAllChargingPrice" parameterType="java.lang.Integer" resultType="com.jczc.operatorweb.entity.ChargingPrice">
+        select *
+        from charging_price cpr
+        where cpr.status = 1
+        and operator_id = #{operatorId}
+    </select>
+    <select id="getPileChargingPrice" resultType="com.jczc.operatorweb.entity.ChargingPrice">
+    	SELECT * 
+    	FROM charging_price 
+    	WHERE id= 
+    		(SELECT charging_price_id 
+    		 FROM charging_pile 
+    		 WHERE identification=#{pileNo})
+    </select>
+    <!--新增一条记录-->
+    <insert id="save" parameterType="com.jczc.operatorweb.entity.ChargingPrice" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO charging_price(
+        name,
+    	description,
+    	uni_price,
+    	create_time,
+    	creator_id,
+    	operator_id,
+    	status
+        )VALUES(
+        #{name},
+        #{description},
+        #{uniPrice},
+        #{createTime},
+        #{creatorId},
+        #{operatorId},
+        1
+        )
+    </insert>
+    
+    <update id="delete" parameterType="java.lang.Integer">
+        update charging_price set status = 2 where id = #{chargingpriceId}
+    </update>
+    
+    <update id="updateById" parameterType="com.jczc.operatorweb.entity.ChargingPrice">
+        UPDATE charging_price
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="creatorId != null">
+                creator_id = #{creatorId},
+            </if>
+            <if test="operatorId != null">
+                operator_id = #{operatorId},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="uniPrice != null">
+                uni_price = #{uniPrice},
+            </if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+</mapper>

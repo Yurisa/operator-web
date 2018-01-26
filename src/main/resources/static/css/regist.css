@@ -1,0 +1,23 @@
+#platformlogo{
+	width:60%;
+	font-size:28px;
+	height:70px;
+}
+#welcome{
+	width:100px;
+	font-size:20px;
+	margin-left:50px;
+}
+#registDIV{
+	width:500px;
+	margin:80px auto;
+}
+#registDIV textarea{
+	resize:none;
+}
+#registDIV .layui-form-item{
+	margin-bottom:20px;
+}
+#registDIV button{
+	margin-right:120px;
+}

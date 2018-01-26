@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.PositionDao">
+    <insert id="save" useGeneratedKeys="true" keyProperty="id">
+       insert into position
+       (
+       region_id,
+       town,
+       detail_address,
+       zip_code,
+       gps_lat,
+       gps_lng,
+       create_time,
+       creator_id,
+       org_id,
+       remark,
+       status
+       )
+       values
+       (
+       #{regionId},
+       #{town},
+       #{detailAddress},
+       #{zipCode},
+       #{gpsLat},
+       #{gpsLng},
+       #{createTime},
+       #{creatorId},
+       1,
+       #{remark},
+       1
+       )
+    </insert>
+
+   <update id="update" parameterType="com.jczc.operatorweb.entity.Position">
+      update position
+      <trim prefix="SET" suffixOverrides=",">
+         <if test="regionId != null">
+            region_id = #{regionId},
+         </if>
+         <if test="town != null">
+            town = #{town},
+         </if>
+         <if test="detailAddress != null">
+            detail_address = #{detailAddress},
+         </if>
+         <if test="zipCode != null">
+            zip_code = #{zipCode},
+         </if>
+         <if test="gpsLat != null">
+            gps_lat = #{gpsLat},
+         </if>
+         <if test="gpsLng != null">
+            gps_lng = #{gpsLng},
+         </if>
+         <if test="createTime != null">
+            create_time = #{createTime},
+         </if>
+         <if test="creatorId != null">
+            creator_id = #{creatorId},
+         </if>
+         <if test="orgId != null">
+            org_id = #{orgId},
+         </if>
+         <if test="remark != null">
+            remark = #{remark},
+         </if>
+         <if test="status != null">
+            status = #{status},
+         </if>
+      </trim>
+      where id = #{id}
+   </update>
+
+   <select id="queryAllStationIdByZoneId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+      select
+      b.id
+      from
+      position p,
+      buildings b
+      where
+      p.id = b.pos_id
+      and p.region_id = #{zoneId}
+      and p.status = 1
+   </select>
+</mapper>

@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.PileGroupDao">
+    <select id="queryPileGroupMessageById" parameterType="java.lang.Integer" resultType="PileGroupMessage">
+        select
+        cpg.id "id",
+        cpg.name "name",
+        b.name "buildings_name",
+        ra.name "zone_name",
+        rb.name "city_name",
+        rc.name "province_name",
+        gt.name "group_type_name",
+        gt.max_count "max_num",
+        count(cp.id) "used_num"
+        from
+        charging_pile_group cpg
+        left join buildings b on  cpg.buildings_id = b.id and b.status = 1
+        left join group_type gt on cpg.group_type_id = gt.id and gt.status = 1
+        left join charging_pile cp on cp.group_id = cpg.id and cp.status = 1
+        left join position p on cpg.position_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on ra.parent_id = rb.id
+        left join region rc on rb.parent_id = rc.id
+        where
+        cpg.status = 1
+        and cpg.id = #{groupId}
+        group by cp.group_id
+    </select>
+    <insert id="save" parameterType="com.jczc.operatorweb.entity.PileGroup">
+        INSERT INTO charging_pile_group(
+        name,
+        operator_id,
+        group_type_id,
+        charging_type,
+        charging_price_id,
+        buildings_id,
+        create_time,
+        creator_id,
+        status,
+        position_id
+        )VALUES(
+        #{name},
+        #{operatorId},
+        #{groupTypeId},
+        #{chargingType},
+        #{chargingPriceId},
+        #{buildingsId},
+        now(),
+        #{creatorId},
+        1,
+        #{positionId}
+        )
+
+    </insert>
+
+    <select id="queryOperatorAllGroupResource" parameterType="java.lang.Integer" resultType="GroupResource">
+        select
+        gt.id "groupTypeId",
+        gt.name "groupType",
+        gt.max_count "maxNum",
+        sum(dgr.alloc_num) "allocNum",
+        sum(dgr.alloc_num) - sum(dgr.used_num) "residueNum"
+        from
+        distribute_group_resource dgr
+        left join   group_type gt on dgr.group_type_id = gt.id and gt.status = 1
+        where
+        dgr.allocated_id = #{operatorId}
+        and dgr.status = 1
+        group by gt.id
+    </select>
+
+    <select id="queryPileGroupByStationId" parameterType="java.lang.Integer" resultType="PileGroupInfo">
+        select
+        cpg.id,
+        cpg.name,
+        cpg.status,
+        gt.id "groupTypeId",
+        gt.name "groupType",
+        count(cp.id) "pileNum",
+        cpr.uni_price "chargingPrice",
+        b.id "stationId",
+        b.name "stationName"
+        from
+        charging_pile_group cpg
+        left join charging_pile cp on cpg.id = cp.group_id and cp.status = 1
+        left join charging_price cpr on cpr.id = cpg.charging_price_id
+        left join buildings b on cpg.buildings_id = b.id
+        left join group_type gt on cpg.group_type_id = gt.id
+        where
+        cpg.status = 1
+        and b.id = #{stationId}
+        <if test="operatorId != null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+        group by cpg.id
+    </select>
+
+    <select id="queryPileGroupByZoneId" parameterType="java.lang.Integer" resultType="PileGroupInfo">
+        select
+        cpg.id,
+        cpg.name,
+        cpg.status,
+        gt.id "groupTypeId",
+        gt.name "groupType",
+        count(cp.id) "pileNum",
+        cpr.uni_price "chargingPrice",
+        b.id "stationId",
+        b.name "stationName"
+        from
+        charging_pile_group cpg
+        left join charging_pile cp on cpg.id = cp.group_id and cp.status = 1
+        left join charging_price cpr on cpr.id = cpg.charging_price_id
+        left join buildings b on cpg.buildings_id = b.id
+        left join position p on b.pos_id = p.id and p.status = 1
+        left join group_type gt on cpg.group_type_id = gt.id
+        where
+        cpg.status = 1
+        and p.region_id = #{zoneId}
+        <if test="operatorId != null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+        group by cpg.id
+    </select>
+
+    <select id="queryPileGroupByCityId" parameterType="java.lang.Integer" resultType="PileGroupInfo">
+        select
+        cpg.id,
+        cpg.name,
+        cpg.status,
+        gt.id "groupTypeId",
+        gt.name "groupType",
+        count(cp.id) "pileNum",
+        cpr.uni_price "chargingPrice",
+        b.id "stationId",
+        b.name "stationName"
+        from
+        charging_pile_group cpg
+        left join charging_pile cp on cpg.id = cp.group_id and cp.status = 1
+        left join charging_price cpr on cpr.id = cpg.charging_price_id
+        left join buildings b on cpg.buildings_id = b.id
+        left join position p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join group_type gt on cpg.group_type_id = gt.id
+        where
+        cpg.status = 1
+        and ra.parent_id = #{cityId}
+        <if test="operatorId != null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+        group by cpg.id
+    </select>
+
+    <select id="queryPileGroupByProvinceId" parameterType="java.lang.Integer" resultType="PileGroupInfo">
+         select
+        cpg.id,
+        cpg.name,
+        cpg.status,
+        gt.id "groupTypeId",
+        gt.name "groupType",
+        count(cp.id) "pileNum",
+        cpr.uni_price "chargingPrice",
+        b.id "stationId",
+        b.name "stationName"
+        from
+        charging_pile_group cpg
+        left join charging_pile cp on cpg.id = cp.group_id and cp.status = 1
+        left join charging_price cpr on cpr.id = cpg.charging_price_id
+        left join buildings b on cpg.buildings_id = b.id
+        left join position p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on ra.parent_id = rb.id
+        left join group_type gt on cpg.group_type_id = gt.id
+        where
+        cpg.status = 1
+        and rb.parent_id = #{provinceId}
+        <if test="operatorId != null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+        group by cpg.id
+    </select>
+
+    <select id="queryGroupStationMessageByStationId" parameterType="java.lang.Integer" resultType="GroupStationMessage">
+        select
+        b.id,
+        b.name,
+        ra.id "zoneId",
+        ra.name "zoneName",
+        rb.id "cityId",
+        rb.name "cityName",
+        rc.id "provinceId",
+        rc.name "provinceName",
+        count(distinct cpg.id) "groupNum",
+        count(distinct cp.id)  "pileNum"
+        from
+        buildings b
+        left join charging_pile_group cpg on cpg.buildings_id = b.id and cpg.status = 1
+        left join charging_pile cp on cpg.id = cp.group_id and cp.status = 1
+        left join position p on p.id = b.pos_id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on ra.parent_id = rb.id
+        left join region rc on rb.parent_id = rc.id
+        where
+        b.status = 1
+        and b.id = #{stationId}
+        <if test="operatorId != null">
+            and b.operator_id = #{operatorId}
+        </if>
+        group by b.id
+    </select>
+
+
+    <select id="queryGroupZoneMessageByZoneId" parameterType="java.lang.Integer" resultType="GroupZoneMessage">
+        select
+        ra.id,
+        ra.name,
+        rb.id "cityId",
+        rb.name "cityName",
+        rc.id "provinceId",
+        rc.name "provinceName",
+        count(distinct b.id) "stationNum",
+        count(distinct cpg.id) "groupNum",
+        count(distinct cp.id)  "pileNum"
+        from
+        region ra
+        left join position p on p.region_id = ra.id and p.status = 1
+        left join buildings b on p.id = b.pos_id and b.status = 1
+        <if test="operatorId != null">
+            and b.operator_id = #{operatorId}
+        </if>
+        left join charging_pile_group cpg on b.id = cpg.buildings_id and cpg.status = 1
+        left join charging_pile cp on cp.group_id = cpg.id and cp.status = 1
+        left join region rb on ra.parent_id = rb.id
+        left join region rc on rb.parent_id = rc.id
+        where
+        ra.id = #{zoneId}
+        group by ra.id
+    </select>
+
+    <select id="queryGroupCityMessageByCityId" parameterType="java.lang.Integer" resultType="GroupCityMessage">
+        select
+        rb.id,
+        rb.name,
+        rc.id "provinceId",
+        rc.name "provinceName",
+        count(distinct b.id) "stationNum",
+        count(distinct cpg.id) "groupNum",
+        count(distinct cp.id)  "pileNum"
+        from
+        region rb
+        left join region ra on ra.parent_id = rb.id
+        left join position p on p.region_id = ra.id and p.status = 1
+        left join buildings b on p.id = b.pos_id and b.status = 1
+        <if test="operatorId != null">
+            and b.operator_id = #{operatorId}
+        </if>
+        left join charging_pile_group cpg on b.id = cpg.buildings_id and cpg.status = 1
+        left join charging_pile cp on cp.group_id = cpg.id and cp.status = 1
+        left join region rc on rb.parent_id = rc.id
+        where
+        rb.id = #{cityId}
+        group by rb.id
+    </select>
+    <select id="queryGroupProvinceMessageByProvinceId" parameterType="java.lang.Integer" resultType="GroupProvinceMessage">
+        select
+        rc.id,
+        rc.name,
+        count(distinct b.id) "stationNum",
+        count(distinct cpg.id) "groupNum",
+        count(distinct cp.id)  "pileNum"
+        from
+        region rc
+        left join region rb on rb.parent_id = rc.id
+        left join region ra on ra.parent_id = rb.id
+        left join position p on p.region_id = ra.id and p.status = 1
+        left join buildings b on p.id = b.pos_id and b.status = 1
+        <if test="operatorId != null">
+            and b.operator_id = #{operatorId}
+        </if>
+        left join charging_pile_group cpg on b.id = cpg.buildings_id and cpg.status = 1
+        left join charging_pile cp on cp.group_id = cpg.id and cp.status = 1
+        where
+        rc.id = #{provinceId}
+        group by rc.id
+    </select>
+
+    <select id="queryGroupByRequirement" parameterType="GroupRequireMent" resultType="PileGroupInfo">
+        select
+        cpg.id,
+        cpg.name,
+        cpg.status,
+        gt.id "groupTypeId",
+        gt.name "groupType",
+        count(cp.id) "pileNum",
+        cpr.uni_price "chargingPrice",
+        b.id "stationId",
+        b.name "stationName"
+        from
+        charging_pile_group cpg
+        left join charging_pile cp on cpg.id = cp.group_id and cp.status = 1
+        left join charging_price cpr on cpr.id = cpg.charging_price_id
+        left join buildings b on cpg.buildings_id = b.id
+        left join position p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on ra.parent_id = rb.id
+        left join group_type gt on cpg.group_type_id = gt.id
+        where
+        <if test="groupRequireMent.status != null">
+            cpg.status = #{groupRequireMent.status}
+        </if>
+        <if test="groupRequireMent.zoneId != -1">
+        and p.region_id = #{groupRequireMent.zoneId}
+        </if>
+        <if test="groupRequireMent.cityId != -1">
+        and ra.parent_id = #{groupRequireMent.cityId}
+        </if>
+        <if test="groupRequireMent.provinceId != -1">
+        and rb.parent_id = #{groupRequireMent.provinceId}
+        </if>
+        <if test="groupRequireMent.groupName != null">
+            and cpg.name like "%"#{groupRequireMent.groupName}"%"
+        </if>
+        <if test="groupRequireMent.stationName != null">
+        and b.name like "%"#{groupRequireMent.stationName}"%"
+        </if>
+        <if test="operatorId != null">
+            and b.operator_id = #{operatorId}
+        </if>
+        group by cpg.id
+    </select>
+    <select id="queryByGroupId" parameterType="java.lang.Integer" resultType="GroupAndPositon">
+        select
+            g.id "groupId",
+            p.id "positionId",
+            g.name,
+            g.status,
+            g.charging_type,
+            g.group_type_id,
+            g.charging_price_id,
+            g.buildings_id,
+            b.name "buildingsName",
+            gt.max_count,
+            gt.name "groupType",
+            p.gps_lng,
+            p.gps_lat
+        from
+            charging_pile_group g
+            left join group_type gt on g.group_type_id = gt.id and gt.status = 1
+            left join position p on g.position_id = p.id and p.status = 1
+            left join buildings b on g.buildings_id = b.id and b.status = 1
+        where
+            g.status = 1
+            and g.id = #{stationId}
+    </select>
+    <update id="updateByGroupId" parameterType="com.jczc.operatorweb.entity.PileGroup">
+        UPDATE charging_pile_group
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="chargingType != null">
+                charging_type = #{chargingType},
+            </if>
+            <if test="chargingPriceId != null">
+                charging_price_id = #{chargingPriceId},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+
+</mapper>

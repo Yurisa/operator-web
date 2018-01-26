@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.VehicleDao">
+    <insert id="save">
+        insert into electric_vehicle (
+        plate_no,
+        brand,
+        model,
+        charging_user_id,
+        create_time,
+        status
+        )
+        values (
+        #{plateNo},
+        #{brand},
+        #{model},
+        #{chargingUserId},
+        now(),
+        1);
+    </insert>
+
+    <select id="validateVehicle" resultType="String">
+        select e.plate_no from electric_vehicle e WHERE e.plate_no=#{plateNo} AND e.charging_user_id=#{chargingUserId} AND e.status=1;
+    </select>
+
+    <update id="delete" parameterType="int">
+        update electric_vehicle e set e.status=2 where e.id=#{id}
+    </update>
+
+    <select id="findByUserId" resultType="VehicleInfo" parameterType="int">
+        select
+        e.id,
+        e.plate_no,
+        e.brand,
+        e.model,
+        e.charging_user_id,
+        e.create_time,
+        e.status
+        from
+        electric_vehicle e
+        WHERE e.charging_user_id=#{id};
+    </select>
+	<select id="getByVehicleId" resultType="VehicleInfo">
+		SELECT
+	        e.id,
+	        e.plate_no,
+	        e.brand,
+	        e.model,
+	        e.charging_user_id,
+	        e.create_time,
+	        e.status
+        FROM
+        	electric_vehicle e
+        WHERE e.id=#{id};
+	</select>
+	<select id="getByPlateNo" resultType="VehicleInfo">
+		SELECT
+	        e.id,
+	        e.plate_no,
+	        e.brand,
+	        e.model,
+	        e.charging_user_id,
+	        e.create_time,
+	        e.status
+        FROM
+        	electric_vehicle e
+        WHERE e.plate_no=#{platNo};
+	</select>
+	<select id="findByPlateNo" resultType="VehicleInfo">
+		SELECT
+	        e.id,
+	        e.plate_no,
+	        e.brand,
+	        e.model,
+	        e.charging_user_id,
+	        e.create_time,
+	        e.status
+        FROM
+        	electric_vehicle e
+        WHERE e.plate_no like CONCAT('%',#{platNo},'%') 
+	</select>
+    <update id="update" parameterType="VehicleInfo">
+        update
+          electric_vehicle e
+        set
+          e.plate_no=#{vehicle.plateNo},
+          e.brand=#{vehicle.brand},
+          e.model=#{vehicle.model}
+        where
+          e.id=#{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.DeviceStateDao">
+	<insert id="addDeviceState" parameterType="DeviceStateInfo">
+        INSERT INTO device_state
+        (
+        device_no,
+        code,
+        name,
+        report_time,
+        status
+        )
+        VALUES
+        (
+        #{deviceNo},
+        #{code},
+        #{name},
+        now(),
+        0
+        )
+    </insert>
+    <update id="handleDeviceState">
+    	UPDATE device_state
+    	SET handler_id=#{handlerId},remark=#{remark},status=1
+    	WHERE id = #{id}
+    </update>
+     <select id="getDeviceState" resultType="DeviceStateInfo">
+    	SELECT 
+    		id,device_no,code,name,
+    		report_time,status,handler_id,handler_time,remark
+    	FROM device_state
+    	WHERE id = #{id}
+    </select>
+    <select id="getLatestDeviceState" resultType="DeviceStateInfo">
+    	SELECT 
+    		id,device_no,code,name,
+    		report_time,status,handler_id,handler_time,remark
+    	FROM device_state
+    	WHERE device_no = #{deviceNo} 
+    	ORDER BY report_time desc
+    	LIMIT 0,1
+    </select>
+    <select id="getHistoryDeviceStates"  resultType="DeviceStateInfo">
+    	SELECT 
+    		id,device_no,code,name,
+    		report_time,status,handler_id,handler_time,remark
+    	FROM device_state
+    	WHERE device_no = #{deviceNo} 
+    		and report_time between #{startTime} and #{endTime}
+    	ORDER BY report_time desc
+    </select>
+</mapper>

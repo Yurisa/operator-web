@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.PileDao">
+
+    <!--新增一条记录-->
+    <insert id="save" parameterType="com.jczc.operatorweb.entity.Pile" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO charging_pile
+        (
+        identification,
+        product_id,
+        managed_by,
+        garage_id,
+        parking_pot_no,
+        group_id,
+        charging_price_id,
+        gps_lat,
+        gps_lng,
+        status,
+        type,
+        device_status,
+        charging_status
+        )
+        VALUES
+        (
+        #{identification},
+        #{productId},
+        #{managedBy},
+        #{garageId},
+        #{parkingPotNo},
+        #{groupId},
+        #{chargingPriceId},
+        #{gpsLat},
+        #{gpsLng},
+        1,
+        #{type},
+        "正常",
+        "正常"
+        )
+    </insert>
+
+    <select id="queryOperatorAllPiles" parameterType="java.lang.Integer" resultType="PileInfo">
+       select
+        cp.id,
+        cp.identification,
+        cp.type,
+        o.name "manufacturer_name",
+        g.name "garage_name",
+        cpr.uni_price "uni_price",
+        cp.parking_pot_no,
+        cp.device_status,
+        cp.charging_status,
+        cp.gps_lng,
+        cp.gps_lat
+        from
+        charging_pile cp
+        left join charging_pile_product cpp on cp.product_id = cpp.id and cpp.status = 1
+        left join organization o on cpp.manufacturer_id = o.id and o.status = 1
+        left join garage g on cp.garage_id = g.id
+        left join charging_price cpr on cp.charging_price_id = cpr.id
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        where
+        cp.status = 1
+        <if test="operatorId!=null">
+        	and cpg.operator_id = #{operatorId}
+        </if>
+        	
+    </select>
+    <select id="queryPileByBuildId" parameterType="java.lang.Integer" resultType="PileInfo">
+        select
+        cp.id,
+        cp.identification,
+        cp.type,
+        o.name "manufacturer_name",
+        g.name "garage_name",
+        cpr.uni_price "uni_price",
+        cp.parking_pot_no,
+        cp.device_status,
+        cp.charging_status,
+        cp.gps_lng,
+        cp.gps_lat
+        from
+        charging_pile cp
+        left join charging_pile_product cpp on cp.product_id = cpp.id and cpp.status = 1
+        left join  organization o on cpp.manufacturer_id = o.id and o.status = 1
+        left join garage g on cp.garage_id = g.id
+        left join charging_price cpr on cp.charging_price_id = cpr.id and cpr.status = 1
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        where
+        cp.status = 1
+        and cpg.buildings_id = #{stationId}
+    </select>
+
+    <select id="queryPileByGroupId" parameterType="java.lang.Integer" resultType="PileInfo">
+        select
+        cp.id,
+        cp.identification,
+        cp.type,
+        o.name "manufacturer_name",
+        g.name "garage_name",
+         cpr.uni_price "uni_price",
+        cp.parking_pot_no,
+        cp.device_status,
+        cp.charging_status,
+        cp.gps_lng,
+        cp.gps_lat
+        from
+        charging_pile cp
+        left join charging_pile_product cpp on cp.product_id = cpp.id and cpp.status = 1
+        left join organization o on cpp.manufacturer_id = o.id and o.status = 1
+        left join charging_price cpr on cp.charging_price_id = cpr.id and cpr.status = 1
+        left join garage g on cp.garage_id = g.id
+        where
+        cp.status = 1
+        and cp.group_id = #{groupId}
+    </select>
+
+    <update id="updateById" parameterType="com.jczc.operatorweb.entity.Pile">
+        UPDATE charging_pile
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="identification != null">
+                identification = #{identification},
+            </if>
+            <if test="productId != null">
+                product_id = #{productId},
+            </if>
+            <if test="managedBy != null">
+                managed_by = #{managedBy},
+            </if>
+            <if test="garageId != null">
+                garage_id = #{garageId},
+            </if>
+            <if test="parkingPotNo != null">
+                parking_pot_no = #{parkingPotNo},
+            </if>
+            <if test="groupId != null">
+                group_id = #{groupId},
+            </if>
+            <if test="chargingPriceId != null">
+                charging_price_id = #{chargingPriceId},
+            </if>
+            <if test="gpsLat != null">
+                gps_lat = #{gpsLat},
+            </if>
+            <if test="gpsLng != null">
+                gps_lng = #{gpsLng},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="type != null">
+                type = #{type},
+            </if>
+            <if test="deviceStatus != null">
+                device_status = #{deviceStatus},
+            </if>
+            <if test="chargingStatus != null">
+                charging_status = #{chargingStatus},
+            </if>
+        </trim>
+        WHERE id = #{id}
+    </update>
+	<update id="updateByNo" parameterType="com.jczc.operatorweb.entity.Pile">
+        UPDATE charging_pile
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="productId != null">
+                product_id = #{productId},
+            </if>
+            <if test="managedBy != null">
+                managed_by = #{managedBy},
+            </if>
+            <if test="garageId != null">
+                garage_id = #{garageId},
+            </if>
+            <if test="parkingPotNo != null">
+                parking_pot_no = #{parkingPotNo},
+            </if>
+            <if test="groupId != null">
+                group_id = #{groupId},
+            </if>
+            <if test="chargingPriceId != null">
+                charging_price_id = #{chargingPriceId},
+            </if>
+            <if test="gpsLat != null">
+                gps_lat = #{gpsLat},
+            </if>
+            <if test="gpsLng != null">
+                gps_lng = #{gpsLng},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="type != null">
+                type = #{type},
+            </if>
+            <if test="deviceStatus != null">
+                device_status = #{deviceStatus},
+            </if>
+            <if test="chargingStatus != null">
+                charging_status = #{chargingStatus},
+            </if>
+        </trim>
+        WHERE identification = #{identification}
+    </update>
+    <update id="delete" parameterType="java.lang.Integer">
+        update charging_pile set status = -1 where id = #{pileId}
+    </update>
+
+    <select id="queryById" parameterType="java.lang.Integer" resultType="com.jczc.operatorweb.entity.Pile">
+         SELECT
+            a.id,
+            a.identification,
+            a.product_id,
+            a.managed_by,
+            a.garage_id,
+            a.parking_pot_no,
+            a.group_id,
+            a.charging_price_id,
+            a.gps_lat,
+            a.gps_lng,
+            a.status,
+            a.type,
+            a.device_status,
+            a.charging_status
+          FROM charging_pile a
+          WHERE a.status = 1
+          AND a.id = #{pileId}
+    </select>
+	<select id="getPileByNo" resultType="PileInfo">
+		select
+        cp.id,
+        cp.identification,
+        cp.type,
+        o.name "manufacturer_name",
+        g.name "garage_name",
+         cpr.uni_price "uni_price",
+        cp.parking_pot_no,
+        cp.device_status,
+        cp.charging_status,
+        cp.gps_lng,
+        cp.gps_lat
+        from
+        charging_pile cp
+        left join charging_pile_product cpp on cp.product_id = cpp.id and cpp.status = 1
+        left join organization o on cpp.manufacturer_id = o.id and o.status = 1
+        left join charging_price cpr on cp.charging_price_id = cpr.id and cpr.status = 1
+        left join garage g on cp.garage_id = g.id
+        where
+        cp.status = 1
+        and cp.identification = #{pileNo}
+	</select>
+
+    <select id="getAllPileIdentification" resultType="java.lang.String">
+        select identification from charging_pile
+    </select>
+</mapper>

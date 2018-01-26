@@ -1,0 +1,35 @@
+#platformlogo{
+    width:28%;
+}
+.layui-body {
+    padding: 15px;
+}
+
+.right{
+    float: right;
+    display: block;
+    margin-bottom: 10px
+}
+#allmap {
+    position: absolute;
+    margin-top: 30px;
+    width: 40%;
+    height: 300px;
+    top: 305px;
+    left: 4%;
+    border: 1px solid gray;
+    overflow: hidden;
+}
+.layui-header{
+    height:70px;
+}
+.layui-layout-admin .layui-logo {
+    line-height: 70px;
+    font-size:22px;
+}
+.layui-layout-admin .layui-side {
+    top: 70px;
+}
+.layui-layout-admin .layui-body {
+    top: 70px;
+}

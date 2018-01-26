@@ -1,0 +1,121 @@
+a:hover{
+	color:#009688;
+}
+#platformlogo{
+	width:28%;
+}
+#picCarousel img{
+	width:100%;
+}
+#table{
+	width:90%;
+	margin:30px auto;
+}
+.news-big-title{
+	font-size:26px;
+	margin:25px 0;
+}
+.news-big-title span{
+	border-bottom:1px solid gray;
+	padding:5px;
+}
+.a-more{
+	cursor:pointer;
+	font-size:14px;
+	float:right;
+	border-bottom:0px solid;
+	padding:10px;
+}
+#left-img{
+	height:300px;
+	position:relative;
+}
+#left-img-small{
+	width:20%;
+	height:150px;
+	float:left;
+}
+#left-img-a{
+	color:#fff;
+	position:absolute;
+	width:360px;
+	background-color:rgba(0, 0, 0, 0.38);
+	padding:15px 0;
+	left:0;
+	bottom:0;
+}
+#right-box{
+	height:145px;
+	overflow:hidden;
+	position:relative;
+}
+#right-box-context{
+	width:70%;
+	overflow:hidden;
+	float:right;
+}
+.h3-title{
+	font-size:24px;
+	padding:0 0 10px 0;
+}
+.h3-a-link{
+	cursor:pointer;
+	display:inline-block;
+	margin:0 5px;
+	
+}
+.lead{
+	line-height:24px;
+	overflow:hidden;
+	height:72px;
+	text-indent:2em;
+}
+#footer{
+	text-align:center;
+	background-color:#23262E;
+	font-size:14px;
+	height:40px;
+	line-height:40px;
+	color:white;
+	margin-top:30px;
+}
+#loginDIV{
+	display:none;
+}
+#login-title{
+	font-size:20px;
+	text-align:center;
+	margin:20px;
+}
+#loginForm .layui-input{
+	width:85%;
+}
+#loginForm .layui-form-item{
+	margin-bottom:20px;
+}
+#loginForm button{
+	margin-right:40px;
+}
+@media screen and (max-width:1025px){
+	#right-box-context{
+		width:65%;
+	}
+	#left-img-small{
+		width:30%;
+	}
+}
+@media screen and (min-width:1025px){
+	.layui-col-md5{
+		width:36%;
+	}
+}
+@media screen and (min-width:1040px){
+	.layui-col-md5{
+		width:40%;
+	}
+}
+@media screen and (min-width:1200px){
+	.layui-col-md5{
+		width:36%;
+	}
+}

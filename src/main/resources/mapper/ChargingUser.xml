@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.ChargingUserDao">
+	
+	<!--根据ID获取用户-->
+    <select id="getUserById" resultType="ChargingUser" parameterType="Integer">
+        select * FROM charging_user c WHERE c.id=#{userId}
+    </select>
+	<select id="getUserByAccessToken" resultType="ChargingUser" parameterType="String">
+		select * FROM charging_user c WHERE c.access_token=#{token}
+	</select>
+    <select id="getUserByMobile" resultType="ChargingUser" parameterType="String">
+        select * FROM charging_user c WHERE c.mobile=#{mobile}
+    </select>
+
+    <insert id="userRegister">
+        insert into charging_user (name,mobile,password,type,score) values (#{mobile},#{mobile},#{password},0,0);
+    </insert>
+	<insert id="userRegisterWithToken">
+		insert into charging_user (name,mobile,password,type,score,access_token) values (#{mobile},#{mobile},#{password},0,0,#{token});
+	</insert>
+    <insert id="createUserAccount">
+      insert into user_account (balance,create_time,charging_user_id,status) values (0,now(),#{id},1);
+    </insert>
+	<update id="freshAccessToken">
+		update charging_user c set access_token=#{accessToken}
+		where c.id=#{id}
+	</update>
+	
+    <update id="editUserInfo">
+        update charging_user c 
+        <trim prefix="set" suffixOverrides=",">
+	        <if test="name!=null">
+	        	c.name=#{name},	
+	        </if>
+	        <if test="email!=null">
+	            c.email=#{email},
+	        </if>
+        </trim>
+        WHERE c.id=#{id};
+    </update>
+	<update id="payAccountDetail">
+		update account_detail 
+		set pay_status=#{status},pay_from=#{payFrom},pay_order_id=#{payOrderId},pay_user_id=#{payUserId}
+		where id=#{accountDetailId};
+	</update>
+    <select id="getUserInfo" resultType="ChargingUser" parameterType="int">
+        select * from charging_user u WHERE u.id=#{id};
+    </select>
+
+    <select id="getUserAccountByUserId" resultType="UserAccount" parameterType="int">
+        select * from user_account WHERE charging_user_id=#{id} AND status=1;
+    </select>
+
+    <select id="searchUserInfo" resultType="ChargingUser" parameterType="String">
+        select * from
+         charging_user c
+         LEFT JOIN
+         user_account u
+         on
+         c.id=u.charging_user_id
+         WHERE
+         u.wxpay=#{wxpay}
+         AND
+         status=1;
+    </select>
+
+    <select id="getBalanceById" resultType="double" parameterType="int">
+        select u.balance from user_account u WHERE u.charging_user_id=#{userId} AND u.status=1;
+    </select>
+
+    <update id="recharge">
+        update user_account set balance = #{balance} where charging_user_id=#{userId} AND status=1;
+    </update>
+
+    <update id="updatePassword">
+        update charging_user c set password = #{password} where c.id=#{userId};
+    </update>
+
+    <select id="getAccountDetail" resultType="AccountDetail">
+        select d.* from account_detail d,user_account u WHERE d.account_id=u.id
+        AND u.charging_User_id=#{userId}
+        AND u.status=1
+        AND d.change_time between #{startTime} and #{endTime}
+    </select>
+	<select id="getAccountDetailById" resultType="AccountDetail">
+		SELECT * from account_detail where id = #{accountDetailId};
+	</select>
+    <select id="getChargeFeeDetail" resultType="ChargedFeeList">
+        select * from charged_fee_list LEFT JOIN account_detail on charged_fee_list.account_detail_id=account_detail.id
+        WHERE account_detail.id=#{accountDetailId};
+    </select>
+
+    <select id="getAmountById" resultType="double">
+        select a.amount from account_detail a WHERE a.id=#{id};
+    </select>
+
+    <update id="setAccountDetail">
+        update account_detail a set a.pay_status = #{payStatus},a.amount=#{amount} where a.id=#{id};
+    </update>
+	<insert id="createUserAccountDetail" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO account_detail
+		(amount,change_time,remark,type,account_id,pay_from,pay_order_id,pay_user_id,pay_status)
+		VALUES
+		(#{amount},#{changeTime},#{remark},#{type},#{accountId},#{payFrom},#{payOrderId},#{payUserId},#{payStatus});
+	</insert>
+	<insert id="createChargedFeeList">
+		INSERT INTO charged_fee_list
+		(fee,fee_type,fee_time,remark,status,account_detail_id,charged_list_id)
+		VALUES
+		(#{fee},#{feeType},#{feeTime},#{remark},#{status},#{accountDetailId},#{chargedListId})
+	</insert>
+    <update id="editAccountInfo">
+        update user_account
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="alipay != null">
+                alipay = #{alipay},
+            </if>
+            <if test="bank != null">
+                bank = #{bank},
+            </if>
+            <if test="bankCard != null">
+                bank_card = #{bankCard},
+            </if>
+            <if test="wxpay != null">
+                wxpay=#{wxpay},
+            </if>
+        </trim>
+        WHERE charging_user_id = #{chargingUserId};
+    </update>
+	
+</mapper>

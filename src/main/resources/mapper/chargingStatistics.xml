@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.ChargingStatisticDao">
+    <select id="queryStationStatisticByZoneId" parameterType="java.lang.Integer" resultType="StationStatistic">
+        select
+        b.id "stationId",
+        b.name "stationName",
+        count(distinct cp.id) "totalPileNum",
+        count(distinct cl.id) "totalChargingNum",
+        (sum(cl.charging_end_time) - sum(cl.charging_begin_time))/3600 "totalChargingHours",
+        sum(cl.electricity) "totalChargingElectricity",
+        sum(cfl.fee) "totalChargingPrice"
+        from
+        buildings b
+        left join position  p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join charging_pile_group cpg on b.id = cpg.buildings_id and cpg.status = 1
+        left join charging_pile cp on cp.group_id = cpg.id and cp.status = 1
+        left join charged_list cl on cp.identification = cl.charging_pile_no and cl.status = 6
+        left join charged_fee_list cfl on cfl.charged_list_id = cl.id
+        where
+        b.status = 1
+        and ra.id = #{zoneId}
+        <if test="operatorId != null">
+            and b.operator_id = #{operatorId}
+        </if>
+        group by b.id
+    </select>
+
+    <select id="queryStationStatisticByCityId" parameterType="java.lang.Integer" resultType="StationStatistic">
+        select
+        b.id "stationId",
+        b.name "stationName",
+        count(distinct cp.id) "totalPileNum",
+        count(distinct cl.id) "totalChargingNum",
+        (sum(cl.charging_end_time) - sum(cl.charging_begin_time))/3600 "totalChargingHours",
+        sum(cl.electricity) "totalChargingElectricity",
+        sum(cfl.fee) "totalChargingPrice"
+        from
+        buildings b
+        left join position  p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join charging_pile_group cpg on b.id = cpg.buildings_id and cpg.status = 1
+        left join charging_pile cp on cp.group_id = cpg.id and cp.status = 1
+        left join charged_list cl on cp.identification = cl.charging_pile_no and cl.status = 6
+        left join charged_fee_list cfl on cfl.charged_list_id = cl.id
+        where
+        b.status = 1
+        and rb.id = #{cityId}
+        <if test="operatorId != null">
+            and b.operator_id = #{operatorId}
+        </if>
+        group by b.id
+    </select>
+
+    <select id="queryStationStatisticByProvinceId" parameterType="java.lang.Integer" resultType="StationStatistic">
+        select
+        b.id "stationId",
+        b.name "stationName",
+        count(distinct cp.id) "totalPileNum",
+        count(distinct cl.id) "totalChargingNum",
+        (sum(cl.charging_end_time) - sum(cl.charging_begin_time))/3600 "totalChargingHours",
+        sum(cl.electricity) "totalChargingElectricity",
+        sum(cfl.fee) "totalChargingPrice"
+        from
+        buildings b
+        left join position  p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join charging_pile_group cpg on b.id = cpg.buildings_id and cpg.status = 1
+        left join charging_pile cp on cp.group_id = cpg.id and cp.status = 1
+        left join charged_list cl on cp.identification = cl.charging_pile_no and cl.status = 6
+        left join charged_fee_list cfl on cfl.charged_list_id = cl.id
+        where
+        b.status = 1
+        and rc.id = #{provinceId}
+        <if test="operatorId != null">
+            and b.operator_id = #{operatorId}
+        </if>
+        group by b.id
+    </select>
+
+    <select id="queryStationStatisticByRequireMent"  resultType="StationStatistic">
+        select
+        b.id "stationId",
+        b.name "stationName",
+        count(distinct cp.id) "totalPileNum",
+        count(distinct cl.id) "totalChargingNum",
+        (sum(cl.charging_end_time) - sum(cl.charging_begin_time))/3600 "totalChargingHours",
+        sum(cl.electricity) "totalChargingElectricity",
+        sum(cfl.fee) "totalChargingPrice"
+        from
+        buildings b
+        left join position  p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join charging_pile_group cpg on b.id = cpg.buildings_id and cpg.status = 1
+        left join charging_pile cp on cp.group_id = cpg.id and cp.status = 1
+        left join charged_list cl on cp.identification = cl.charging_pile_no and cl.status = 6
+        <if test="stationStatisticRequireMent.beginTime != null">
+           and cl.charging_begin_time > #{stationStatisticRequireMent.beginTime}
+        </if>
+        <if test="stationStatisticRequireMent.endTime != null">
+            and cl.charging_end_time &lt; #{stationStatisticRequireMent.endTime}
+        </if>
+        left join charged_fee_list cfl on cfl.charged_list_id = cl.id
+        where
+        b.status = 1
+        <if test="stationStatisticRequireMent.zoneId != -1">
+            and p.region_id = #{stationStatisticRequireMent.zoneId}
+        </if>
+        <if test="stationStatisticRequireMent.cityId != -1">
+            and ra.parent_id = #{stationStatisticRequireMent.cityId}
+        </if>
+        <if test="stationStatisticRequireMent.provinceId != -1">
+            and rb.parent_id = #{stationStatisticRequireMent.provinceId}
+        </if>
+        <if test="stationStatisticRequireMent.stationName != null">
+            and b.name like "%"#{stationStatisticRequireMent.stationName}"%"
+        </if>
+        <if test="operatorId != null">
+            and b.operator_id = #{operatorId}
+        </if>
+        group by b.id
+    </select>
+
+    <select id="queryPileStatisticByStationId" resultType="PileStatistic">
+        select
+        cp.id "pileId",
+        cp.identification "pileName",
+        cp.garage_id "garageId",
+        g.name "garageName",
+        cp.parking_pot_no "parkPotNo",
+        count(distinct cl.id) "totalChargingNum",
+        (sum(cl.charging_end_time) - sum(cl.charging_begin_time))/3600 "totalChargingHours",
+        sum(cl.electricity) "totalChargingElectricity",
+        sum(cfl.fee) "totalChargingPrice"
+        from
+        charging_pile cp
+        left join garage g on cp.garage_id = g.id
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        left join buildings b on cpg.buildings_id = b.id and b.status = 1
+        left join position  p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join charged_list cl on cp.identification = cl.charging_pile_no and cl.status = 6
+        left join charged_fee_list cfl on cfl.charged_list_id = cl.id
+        where
+        cp.status = 1
+        and b.id = #{stationId}
+        <if test="operatorId != null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+        group by cp.id
+    </select>
+    <select id="queryPileStatisticByZoneId"  resultType="PileStatistic">
+        select
+        cp.id "pileId",
+        cp.identification "pileName",
+        cp.garage_id "garageId",
+        g.name "garageName",
+        cp.parking_pot_no "parkPotNo",
+        count(distinct cl.id) "totalChargingNum",
+        (sum(cl.charging_end_time) - sum(cl.charging_begin_time))/3600 "totalChargingHours",
+        sum(cl.electricity) "totalChargingElectricity",
+        sum(cfl.fee) "totalChargingPrice"
+        from
+        charging_pile cp
+        left join garage g on cp.garage_id = g.id
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        left join buildings b on cpg.buildings_id = b.id and b.status = 1
+        left join position  p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join charged_list cl on cp.identification = cl.charging_pile_no and cl.status = 6
+        left join charged_fee_list cfl on cfl.charged_list_id = cl.id
+        where
+        cp.status = 1
+        and ra.id = #{zoneId}
+        <if test="operatorId != null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+        group by cp.id
+    </select>
+
+
+    <select id="queryPileStatisticByCityId" parameterType="java.lang.Integer" resultType="PileStatistic">
+        select
+        cp.id "pileId",
+        cp.identification "pileName",
+        cp.garage_id "garageId",
+        g.name "garageName",
+        cp.parking_pot_no "parkPotNo",
+        count(distinct cl.id) "totalChargingNum",
+        (sum(cl.charging_end_time) - sum(cl.charging_begin_time))/3600 "totalChargingHours",
+        sum(cl.electricity) "totalChargingElectricity",
+        sum(cfl.fee) "totalChargingPrice"
+        from
+        charging_pile cp
+        left join garage g on cp.garage_id = g.id
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        left join buildings b on cpg.buildings_id = b.id and b.status = 1
+        left join position  p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join charged_list cl on cp.identification = cl.charging_pile_no and cl.status = 6
+        left join charged_fee_list cfl on cfl.charged_list_id = cl.id
+        where
+        cp.status = 1
+        and rb.id = #{cityId}
+        <if test="operatorId != null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+        group by cp.id
+    </select>
+
+
+
+    <select id="queryPileStatisticByProvinceId" parameterType="java.lang.Integer" resultType="PileStatistic">
+        select
+        cp.id "pileId",
+        cp.identification "pileName",
+        cp.garage_id "garageId",
+        g.name "garageName",
+        cp.parking_pot_no "parkPotNo",
+        count(distinct cl.id) "totalChargingNum",
+        (sum(cl.charging_end_time) - sum(cl.charging_begin_time))/3600 "totalChargingHours",
+        sum(cl.electricity) "totalChargingElectricity",
+        sum(cfl.fee) "totalChargingPrice"
+        from
+        charging_pile cp
+        left join garage g on cp.garage_id = g.id
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        left join buildings b on cpg.buildings_id = b.id and b.status = 1
+        left join position  p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join charged_list cl on cp.identification = cl.charging_pile_no and cl.status = 6
+        left join charged_fee_list cfl on cfl.charged_list_id = cl.id
+        where
+        cp.status = 1
+        and rc.id = #{provinceId}
+        <if test="operatorId != null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+        group by cp.id
+    </select>
+
+    <select id="queryPileStatisticByRequireMent"  resultType="PileStatistic">
+         select
+        cp.id "pileId",
+        cp.identification "pileName",
+        cp.garage_id "garageId",
+        g.name "garageName",
+        cp.parking_pot_no "parkPotNo",
+        count(distinct cl.id) "totalChargingNum",
+        (sum(cl.charging_end_time) - sum(cl.charging_begin_time))/3600 "totalChargingHours",
+        sum(cl.electricity) "totalChargingElectricity",
+        sum(cfl.fee) "totalChargingPrice"
+        from
+        charging_pile cp
+        left join garage g on cp.garage_id = g.id
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        left join buildings b on cpg.buildings_id = b.id and b.status = 1
+        left join position  p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join charged_list cl on cp.identification = cl.charging_pile_no and cl.status = 6
+        <if test="pileStatisticRequireMent.beginTime != null">
+            and cl.charging_begin_time > #{pileStatisticRequireMent.beginTime}
+        </if>
+        <if test="pileStatisticRequireMent.endTime != null">
+            and cl.charging_end_time &lt;  #{pileStatisticRequireMent.endTime}
+        </if>
+        left join charged_fee_list cfl on cfl.charged_list_id = cl.id
+        where
+        cp.status = 1
+        <if test="pileStatisticRequireMent.zoneId != -1">
+            and p.region_id = #{pileStatisticRequireMent.zoneId}
+        </if>
+        <if test="pileStatisticRequireMent.cityId != -1">
+            and ra.parent_id = #{pileStatisticRequireMent.cityId}
+        </if>
+        <if test="pileStatisticRequireMent.provinceId != -1">
+            and rb.parent_id = #{pileStatisticRequireMent.provinceId}
+        </if>
+        <if test="pileStatisticRequireMent.pileName != null">
+            and cp.identification like "%"#{pileStatisticRequireMent.pileName}"%"
+        </if>
+        <if test="operatorId != null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+        group by cp.id
+    </select>
+
+    <resultMap id="ChargingStatisticMap" type="ChargingStatistic">
+        <id column="chargingId" property="chargingId"></id>
+        <collection property="totalChargingPrice" column="chargingId" ofType="java.lang.Double" select="selectPrice"/>
+    </resultMap>
+    <select id="queryChargingStatisticByStationId"   resultMap="ChargingStatisticMap">
+        select
+        cl.id "chargingId",
+        cp.identification "pileIdentification",
+        cpp.name "pileName",
+        g.id "garageId",
+        g.name "garageName",
+        cp.parking_pot_no "parkPotNo",
+        cl.charging_user_id "chargingUserId",
+        cu.name "chargingUserName",
+        cl.vehicle_no "vehicleNo",
+        cl.charging_begin_time "chargingBeginTime",
+        cl.charging_end_time "chargingEndTime",
+        (unix_timestamp(cl.charging_end_time) - unix_timestamp(cl.charging_begin_time))/3600 "totalChargingHours",
+        cl.electricity "totalChargingElectricity",
+        cfl.status
+        from
+        charged_list cl
+        left join charging_pile cp on cl.charging_pile_no = cp.identification and cp.status = 1
+        left join charging_pile_product cpp on cpp.id = cp.product_id
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        left join buildings b on cpg.buildings_id = b.id
+        left join position p on b.pos_id = p.id
+        left join region ra on ra.id = p.region_id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join garage g on cp.garage_id = g.id
+        left join charging_user cu on cu.id = cl.charging_user_id
+        left join charged_fee_list cfl on cl.id = cfl.charged_list_id
+        where
+         b.id = #{stationId}
+        <if test="operatorId!=null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+    </select>
+    <select id="selectPrice" parameterType="java.lang.Integer" resultType="java.lang.Double">
+        select
+        sum(cfl.fee)
+        from
+        charged_fee_list cfl
+        where
+        cfl.charged_list_id = #{clId}
+    </select>
+    
+    <select id="queryChargingStatisticByZoneId" resultMap="ChargingStatisticMap">
+        select
+        cl.id "chargingId",
+        cp.identification "pileIdentification",
+        cpp.name "pileName",
+        g.id "garageId",
+        g.name "garageName",
+        cp.parking_pot_no "parkPotNo",
+        cl.charging_user_id "chargingUserId",
+        cu.name "chargingUserName",
+        cl.vehicle_no "vehicleNo",
+        cl.charging_begin_time "chargingBeginTime",
+        cl.charging_end_time "chargingEndTime",
+        (unix_timestamp(cl.charging_end_time) - unix_timestamp(cl.charging_begin_time))/3600 "totalChargingHours",
+        cl.electricity "totalChargingElectricity",
+        cfl.status
+        from
+        charged_list cl
+        left join charging_pile cp on cl.charging_pile_no = cp.identification and cp.status = 1
+        left join charging_pile_product cpp on cpp.id = cp.product_id
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        left join buildings b on cpg.buildings_id = b.id
+        left join position p on b.pos_id = p.id
+        left join region ra on ra.id = p.region_id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join garage g on cp.garage_id = g.id
+        left join charging_user cu on cu.id = cl.charging_user_id
+        left join charged_fee_list cfl on cl.id = cfl.charged_list_id
+        where
+        ra.id = #{zoneId}
+        <if test="operatorId!=null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+    </select>
+    
+    <select id="queryChargingStatisticByCityId" resultMap="ChargingStatisticMap">
+        select
+        cl.id "chargingId",
+        cp.identification "pileIdentification",
+        cpp.name "pileName",
+        g.id "garageId",
+        g.name "garageName",
+        cp.parking_pot_no "parkPotNo",
+        cl.charging_user_id "chargingUserId",
+        cu.name "chargingUserName",
+        cl.vehicle_no "vehicleNo",
+        cl.charging_begin_time "chargingBeginTime",
+        cl.charging_end_time "chargingEndTime",
+        (unix_timestamp(cl.charging_end_time) - unix_timestamp(cl.charging_begin_time))/3600 "totalChargingHours",
+        cl.electricity "totalChargingElectricity",
+        cfl.status
+        from
+        charged_list cl
+        left join charging_pile cp on cl.charging_pile_no = cp.identification and cp.status = 1
+        left join charging_pile_product cpp on cpp.id = cp.product_id
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        left join buildings b on cpg.buildings_id = b.id
+        left join position p on b.pos_id = p.id
+        left join region ra on ra.id = p.region_id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join garage g on cp.garage_id = g.id
+        left join charging_user cu on cu.id = cl.charging_user_id
+        left join charged_fee_list cfl on cl.id = cfl.charged_list_id
+        where
+        rb.id = #{cityId}
+        <if test="operatorId!=null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+    </select>
+
+    <select id="queryChargingStatisticByProvinceId" resultMap="ChargingStatisticMap">
+        select
+        cl.id "chargingId",
+        cp.identification "pileIdentification",
+        cpp.name "pileName",
+        g.id "garageId",
+        g.name "garageName",
+        cp.parking_pot_no "parkPotNo",
+        cl.charging_user_id "chargingUserId",
+        cu.name "chargingUserName",
+        cl.vehicle_no "vehicleNo",
+        cl.charging_begin_time "chargingBeginTime",
+        cl.charging_end_time "chargingEndTime",
+        (unix_timestamp(cl.charging_end_time) - unix_timestamp(cl.charging_begin_time))/3600 "totalChargingHours",
+        cl.electricity "totalChargingElectricity",
+        cfl.status
+        from
+        charged_list cl
+        left join charging_pile cp on cl.charging_pile_no = cp.identification and cp.status = 1
+        left join charging_pile_product cpp on cpp.id = cp.product_id
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        left join buildings b on cpg.buildings_id = b.id
+        left join position p on b.pos_id = p.id
+        left join region ra on ra.id = p.region_id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join garage g on cp.garage_id = g.id
+        left join charging_user cu on cu.id = cl.charging_user_id
+        left join charged_fee_list cfl on cl.id = cfl.charged_list_id
+        where
+        rc.id = #{provinceId}
+        <if test="operatorId!=null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+    </select>
+
+    <select id="queryChargingStatisticByRequireMent" resultMap="ChargingStatisticMap">
+        select
+        cl.id "chargingId",
+        cp.identification "pileIdentification",
+        cpp.name "pileName",
+        g.id "garageId",
+        g.name "garageName",
+        cp.parking_pot_no "parkPotNo",
+        cl.charging_user_id "chargingUserId",
+        cu.name "chargingUserName",
+        cl.vehicle_no "vehicleNo",
+        cl.charging_begin_time "chargingBeginTime",
+        cl.charging_end_time "chargingEndTime",
+        (unix_timestamp(cl.charging_end_time) - unix_timestamp(cl.charging_begin_time))/3600 "totalChargingHours",
+        cl.electricity "totalChargingElectricity",
+        cfl.status
+        from
+        charged_list cl
+        left join charging_pile cp on cl.charging_pile_no = cp.identification and cp.status = 1
+        left join charging_pile_product cpp on cpp.id = cp.product_id
+        left join charging_pile_group cpg on cp.group_id = cpg.id and cpg.status = 1
+        left join buildings b on cpg.buildings_id = b.id
+        left join position p on b.pos_id = p.id
+        left join region ra on ra.id = p.region_id
+        left join region rb on rb.id = ra.parent_id
+        left join region rc on rc.id = rb.parent_id
+        left join garage g on cp.garage_id = g.id
+        left join charging_user cu on cu.id = cl.charging_user_id
+        left join charged_fee_list cfl on cl.id = cfl.charged_list_id
+        where
+        cl.id = cl.id
+        <if test="operatorId!=null">
+            and cpg.operator_id = #{operatorId}
+        </if>
+        <if test="chargingStatisticRequireMent.status != null">
+            and cfl.status = #{chargingStatisticRequireMent.status}
+        </if>
+        <if test="chargingStatisticRequireMent.beginTime != null">
+            and cl.charging_begin_time > #{chargingStatisticRequireMent.beginTime}
+        </if>
+        <if test="chargingStatisticRequireMent.endTime != null">
+            and cl.charging_end_time &lt; #{chargingStatisticRequireMent.endTime}
+        </if>
+        <if test="chargingStatisticRequireMent.pileIdentification != null">
+            and cp.identification like "%"#{chargingStatisticRequireMent.pileIdentification}"%"
+        </if>
+        <if test="chargingStatisticRequireMent.chargingUserName != null">
+            and cu.name like "%"#{chargingStatisticRequireMent.chargingUserName}"%"
+        </if>
+        <if test="chargingStatisticRequireMent.zoneId != -1">
+            and p.region_id = #{chargingStatisticRequireMent.zoneId}
+        </if>
+        <if test="chargingStatisticRequireMent.cityId != -1">
+            and ra.parent_id = #{chargingStatisticRequireMent.cityId}
+        </if>
+        <if test="chargingStatisticRequireMent.provinceId != -1">
+            and rb.parent_id = #{chargingStatisticRequireMent.provinceId}
+        </if>
+    </select>
+</mapper>

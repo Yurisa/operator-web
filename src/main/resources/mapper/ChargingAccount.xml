@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.ChargingAccountDao">
+    <select id="getChargingFeeByUserId" resultType="ChargingFeeInfo">
+        SELECT 
+        	cl.charging_user_id "userId",
+        	cl.charging_pile_no "pileNo",
+        	cl.charging_begin_time "startTime",
+        	cl.charging_end_time "endTime",
+        	cl.id "chargedListId",
+        	cfl.account_detail_id "accountDetailId",
+        	sum(cfl.fee) "money",
+        	sum(cfl.electricity) "totolElectricity",
+        	ad.pay_status "status"
+		FROM 
+			charged_fee_list cfl,charged_list cl,account_detail ad
+		WHERE 
+			cl.id=cfl.charged_list_id 
+			AND cfl.account_detail_id=ad.id 
+			AND cl.charging_begin_time between #{start} and #{end}
+			AND cl.charging_user_id=#{userId}
+			<if test="status!=null">
+				AND ad.pay_status = #{status}
+			</if>
+		GROUP BY 
+			cfl.account_detail_id,cfl.charged_list_id
+		ORDER BY 
+			ad.pay_status,
+			cl.charging_begin_time DESC
+    </select>
+    <select id="getChargingFeeByPileNo" resultType="ChargingFeeInfo">
+        SELECT 
+        	cl.charging_user_id "userId",
+        	cl.charging_pile_no "pileNo",
+        	cl.charging_begin_time "startTime",
+        	cl.charging_end_time "endTime",
+        	cl.id "chargedListId",
+        	cfl.account_detail_id "accountDetailId",
+        	sum(cfl.fee) "money",
+        	sum(cfl.electricity) "totolElectricity",
+        	ad.pay_status "status"
+		FROM 
+			charged_fee_list cfl,charged_list cl,account_detail ad
+		WHERE 
+			cl.id=cfl.charged_list_id 
+			AND cfl.account_detail_id=ad.id 
+			AND cl.charging_begin_time between #{start} and #{end}
+			AND cl.charging_pile_no=#{pileNo}
+			<if test="status!=null">
+				AND ad.pay_status = #{status}
+			</if>
+		GROUP BY 
+			cfl.account_detail_id,cfl.charged_list_id
+		ORDER BY 
+			ad.pay_status,
+			cl.charging_begin_time DESC
+     </select>
+     <select id="getChargingFeeByChargedListId" resultType="ChargingFeeInfo">
+     	SELECT 
+        	cl.charging_user_id "userId",
+        	cl.charging_pile_no "pileNo",
+        	cl.charging_begin_time "startTime",
+        	cl.charging_end_time "endTime",
+        	cl.id "chargedListId",
+        	cfl.account_detail_id "accountDetailId",
+        	sum(cfl.fee) "money",
+        	sum(cfl.electricity) "totolElectricity",
+        	ad.pay_status "status"
+		FROM 
+			charged_fee_list cfl,charged_list cl,account_detail ad
+		WHERE 
+			cl.id=cfl.charged_list_id 
+			AND cfl.account_detail_id=ad.id 
+			AND cfl.charged_list_id=#{chargedListId}
+		GROUP BY 
+			cfl.account_detail_id,cfl.charged_list_id
+     </select>
+     <select id="getRechargeHistory" resultType="AccountDetail">
+     	SELECT 
+     		d.* 
+     	FROM 
+     		account_detail d,user_account u 
+     	WHERE 
+     		d.account_id=u.id
+        	AND u.charging_User_id=#{userId}
+        	AND u.status=1
+        	AND d.type=1
+        	AND d.pay_status=1
+        	AND d.change_time between #{start} and #{end}
+     </select>
+</mapper>

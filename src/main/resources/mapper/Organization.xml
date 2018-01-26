@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.OrganizationDao">
+    <!--新增一条记录-->
+    <insert id="save" parameterType="com.jczc.operatorweb.entity.Organization" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO organization(
+        parent_id,
+    	name,
+    	description,
+    	create_time,
+    	type,
+    	status
+        )VALUES(
+        1,
+        #{orgName},
+        #{description},
+        #{createTime},
+        3,
+        1
+        )
+    </insert>
+    <select id="queryOrganizationById" parameterType="java.lang.Integer" resultType="com.jczc.operatorweb.entity.Organization">
+        select
+        id
+        from organization
+        where id = #{id}
+    </select>
+</mapper>

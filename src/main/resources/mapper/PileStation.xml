@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jczc.operatorweb.dao.PileStationDao">
+    <select id="queryPileStationMessageById" parameterType="java.lang.Integer" resultType="PileStationMessage">
+        select
+        b.id "id",
+        b.name "name",
+        ra.name "zone_name",
+        rb.name "city_name",
+        rc.name "province_name",
+        from
+        buildings b,
+        position p,
+        region ra,
+        region rb,
+        region rc
+        where
+        b.pos_id = p.id
+        and p.region_id = ra.id
+        and ra.parent_id = rb.id
+        and rb.parent_id = rc.id
+        and b.status = 1
+        and b.id = #{stationId}
+    </select>
+    <resultMap id="ResultMap" type="AreaAndStations">
+        <result column="zone_id" jdbcType="INTEGER" property="zoneId" />
+        <result column="zone_name" jdbcType="VARCHAR" property="zoneName" />
+        <result column="city_id" jdbcType="INTEGER" property="cityId" />
+        <result column="city_name" jdbcType="VARCHAR" property="cityName" />
+        <result column="province_id" jdbcType="INTEGER" property="provinceId" />
+        <result column="province_name" jdbcType="VARCHAR" property="provinceName" />
+        <collection property="pileStations" ofType="com.jczc.operatorweb.entity.PileStation"
+                    columnPrefix="building_" resultMap="pileStation"></collection>
+    </resultMap>
+    <resultMap id="pileStation" type="com.jczc.operatorweb.entity.PileStation">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="name" jdbcType="VARCHAR" property="name" />
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="creator_id" jdbcType="INTEGER" property="creatorId"/>
+        <result column="status" jdbcType="INTEGER" property="status"/>
+    </resultMap>
+    
+    <select id="queryAllAreaAndStations" resultMap="ResultMap">
+        select distinct
+        ra.id "zone_id",
+        ra.name "zone_name",
+        rb.id "city_id",
+        rb.name "city_name",
+        rc.id "province_id",
+        rc.name "province_name",
+        b.id "building_id",
+        b.name "building_name",
+        b.creator_id "building_creator_id",
+        b.description "building_description",
+        b.status "building_status"
+         from
+         position p,
+         region ra,
+         region rb,
+         region rc,
+         buildings b
+         where
+         p.id
+         in (select distinct b.pos_id
+         from buildings b)
+         and p.region_id=ra.id
+         and ra.parent_id = rb.id
+         and rb.parent_id = rc.id
+         and b.pos_id = p.id
+         and b.status = 1
+         and b.operator_id = #{operatorId}
+    </select>
+    
+    <resultMap id="pileStationInfo" type="PileStationInfo">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <collection property="pileNum" column="id" ofType="java.lang.Integer" select="selectPileNum"/>
+        <collection property="chargingNum" column="id" ofType="java.lang.Integer" select="selectChargingNum"/>
+        <collection property="brokenNum" column="id" ofType="java.lang.Integer" select="selectBrokenNum"/>
+        <collection property="totalElectricity" column="id" ofType="java.lang.Double" select="selectTotalElectricity"/>
+        <collection property="totalPrice" column="id" ofType="java.lang.Double" select="selectTotalPrice"/>
+    </resultMap>
+    <select id="queryAllPileStationsByOperatorId" parameterType="java.lang.Integer" resultMap="pileStationInfo">
+        select
+        b.id,
+        b.name,
+        b.pos_id,
+        p.detail_address,
+        ra.name "zoneName",
+        rb.name "cityName",
+        rc.name "provinceName",
+        b.status,
+        b.create_time "createTime"
+        from
+        buildings b
+        left join position p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on ra.parent_id = rb.id
+        left join region rc on rb.parent_id = rc.id
+        where
+        b.status = 1
+        and b.operator_id = #{operatorId}
+    </select>
+    <select id="getPileStationStatById" parameterType="java.lang.Integer" resultMap="pileStationInfo">
+    	select
+        b.id,
+        b.name,
+        b.pos_id,
+        p.detail_address,
+        ra.name "zoneName",
+        rb.name "cityName",
+        rc.name "provinceName",
+        b.status,
+        b.create_time "createTime"
+        from
+        buildings b
+        left join position p on b.pos_id = p.id and p.status = 1
+        left join region ra on p.region_id = ra.id
+        left join region rb on ra.parent_id = rb.id
+        left join region rc on rb.parent_id = rc.id
+        where
+        b.id = #{stationId}
+    </select>
+    <select id="selectPileNum" resultType="java.lang.Integer">
+        select
+        count(cp.id) "pileNum"
+        from
+        buildings b
+        left outer join charging_pile_group cpg on b.id = cpg.buildings_id
+        left outer join charging_pile cp on cpg.id = cp.group_id
+        where
+        b.id = #{id}
+        and cp.status = 1
+        group by b.id
+    </select>
+    <select id="selectChargingNum" resultType="java.lang.Integer">
+        select
+        count(cp.id) "chargingNum"
+        from
+        buildings b
+        left join charging_pile_group cpg on  b.id = cpg.buildings_id
+        left join charging_pile cp on cpg.id = cp.group_id and cp.charging_status ="正在充电"
+        group by b.id
+        having
+        b.id =#{id};
+    </select>
+    <select id="selectBrokenNum" resultType="java.lang.Integer">
+        select
+        count(cp.id) "brokenNum"
+        from
+        buildings b
+        left join charging_pile_group cpg on  b.id = cpg.buildings_id
+        left join charging_pile cp on cpg.id = cp.group_id and cp.device_status ="故障"
+        group by b.id
+        having
+        b.id = #{id};
+    </select>
+    <select id="selectTotalElectricity" resultType="java.lang.Double">
+        select
+        sum(cl.electricity) "totalElectricity"
+        from
+        buildings b,
+        charging_pile_group cpg,
+        charging_pile cp,
+        charged_list cl
+        where
+        b.id = cpg.buildings_id
+        and cpg.id = cp.group_id
+        and cl.charging_pile_used = cp.id
+        and cl.status = 1
+        and b.id = #{id}
+        group by b.id
+    </select>
+    <select id="selectTotalPrice" resultType="java.lang.Double">
+        select
+        sum(cfl.fee) "totalPrice"
+        from
+        buildings b,
+        charging_pile_group cpg,
+        charging_pile cp,
+        charged_list cl,
+        charged_fee_list cfl
+        where
+        b.id = cpg.buildings_id
+        and cpg.id = cp.group_id
+        and cl.charging_pile_used = cp.id
+        and cfl.status = 1
+        and b.id = #{id}
+        group by b.id
+    </select>
+    
+    <insert id="save" useGeneratedKeys="true" keyProperty="id" parameterType="com.jczc.operatorweb.entity.PileStation">
+        insert into buildings
+        (
+        name,
+        description,
+        create_time,
+        operator_id,
+        creator_id,
+        parent_id,
+        pos_id,
+        type,
+        status
+        )
+        values
+        (
+        #{name},
+        #{description},
+        #{createTime},
+        #{operatorId},
+        #{creatorId},
+        0,
+        #{posId},
+        1,
+        1
+        )
+    </insert>
+	<select id="getPileStationsWithGps" resultType="StationAndPosition">
+    	SELECT
+	        b.id "stationId",
+	        b.pos_id "positionId",
+	        b.name,
+	        b.description,
+	        p.gps_lng,
+	        p.gps_lat,
+	        p.region_id,
+	        p.detail_address,
+	        b.creator_id,
+	        b.operator_id
+        FROM buildings b
+        LEFT JOIN position p on b.pos_id = p.id and p.status = 1
+        WHERE b.status = 1    
+    </select>
+    <select id="queryStationById" parameterType="java.lang.Integer" resultType="StationAndPosition">
+        select
+        b.id "stationId",
+        b.pos_id "positionId",
+        b.name,
+        b.description,
+        p.gps_lng,
+        p.gps_lat,
+        p.region_id,
+        p.detail_address,
+        b.creator_id,
+        b.operator_id
+        from
+        buildings b
+        left join position p on b.pos_id = p.id and p.status = 1
+        where
+        b.status = 1
+        and b.id = #{stationId}
+    </select>
+    
+    <update id="update" parameterType="com.jczc.operatorweb.entity.PileStation">
+        update buildings
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="creatorId != null">
+                creator_id = #{creatorId},
+            </if>
+            <if test="operatorId != null">
+                operator_id = #{operatorId},
+            </if>
+            <if test="parentId != null">
+                parent_id = #{parentId},
+            </if>
+            <if test="posId != null">
+                pos_id = #{posId},
+            </if>
+            <if test="type != null">
+                type = #{type},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <select id="queryStationByLngLat" resultType="StationAndPosition">
+        select
+        b.id "stationId",
+        b.pos_id "positionId",
+        b.name,
+        b.description,
+        p.gps_lng,
+        p.gps_lat,
+        p.region_id,
+        p.detail_address,
+        b.creator_id
+        from
+        buildings b
+        left join position p on b.pos_id = p.id and p.status = 1
+        where
+        b.status = 1
+        and p.gps_lng >= #{minLng}
+        and p.gps_lng  	&lt;= #{maxLng}
+        and p.gps_lat >= #{minLat}
+        and p.gps_lat 	&lt;= #{maxLat}
+    </select>
+    <update id="delete" parameterType="java.lang.Integer">
+        update buildings set status = -1 where buildings.id = #{stationId}
+    </update>
+
+
+    <!--<resultMap id="StationAndElectricityResultMap" type="StationAndElectricity">-->
+        <!--<id column="id" property="id"/>-->
+        <!--<result column="name" property="name"/>-->
+        <!--<collection property="pileNum" column="id" ofType="java.lang.Integer" select="selectPileNum"/>-->
+        <!--<collection property="chargingTimes" column="id" ofType="java.lang.Integer" select="selectChargingNum"/>-->
+        <!--<collection property="chargingHours" column="id" ofType="java.lang.Double" select="selectchargingHours"/>-->
+        <!--<collection property="electricity" column="id" ofType="java.lang.Double" select="selectTotalElectricity"/>-->
+        <!--<collection property="chargingPrice" column="id" ofType="java.lang.Double" select="selectTotalPrice"/>-->
+    <!--</resultMap>-->
+
+    <!--<select id="findStationStatisticsByAreaId" resultMap="StationAndElectricity">-->
+
+
+    <!--</select>-->
+</mapper>
